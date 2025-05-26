@@ -104,6 +104,11 @@ def move(game_state: typing.Dict) -> typing.Dict:
                     "x"]:
                 is_move_safe["down"] = False
 
+    # check for head to head collisions
+    dangerdirection = checkCollision(game_state)
+    if dangerdirection != "none":
+        is_move_safe[f"{dangerdirection}"] = False
+
     # Are there any safe moves left?
     safe_moves = []
     for move, isSafe in is_move_safe.items():
@@ -114,11 +119,6 @@ def move(game_state: typing.Dict) -> typing.Dict:
         print(
             f"MOVE {game_state['turn']}: No safe moves detected! Moving down")
         return {"move": "down"}
-
-    # check for head to head collisions
-    dangerdirection = checkCollision(game_state)
-    if dangerdirection != "none":
-        is_move_safe[f"{dangerdirection}"] = False
 
     # Choose a random move from the safe ones
     next_move = random.choice(safe_moves)
