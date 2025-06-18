@@ -58,17 +58,16 @@ class DistanceOfHeads(BasicHeuristic):
   """
   Returns one, if heads are in opposite corners and zero if they are directly next to each other.
   """
-
   def normalizedHeuristic(self, game_state):
     my_head = game_state["you"]["head"]
     op_head = game_state["board"]["snakes"][0]["head"]
     if op_head == my_head:
-      op_head = game_state["board"]["snakes"][1]["head"]
-    distanceFraction = 1 / (abs(my_head["x"] - op_head["x"]) +
-                            abs(my_head["y"] - op_head["y"]))
-    min_val = 1 / 20
-    max_val = 1
-    return 1 - (distanceFraction - min_val) / (max_val - min_val)
+        op_head = game_state["board"]["snakes"][1]["head"]
+    trueDistance = abs(my_head["x"] - op_head["x"]) + abs(my_head["y"] -
+                                                          op_head["y"])
+    min_val = 0
+    max_val = 20
+    return (trueDistance - min_val) / (max_val - min_val)
 
 
 class SpaceSimple(BasicHeuristic):
