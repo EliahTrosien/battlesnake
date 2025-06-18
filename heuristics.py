@@ -18,13 +18,14 @@ class AreaAroundHead(BasicHeuristic):
   """
 
   def normalizedHeuristic(self, game_state):
-    my_head = game_state["you"]["head"]
-    my_body = game_state["you"]["body"]
-    if len(game_state["board"]["snakes"]) == 1:
-        return 0
-    op_body = game_state["board"]["snakes"][0]["body"]
-    if op_body == my_body:
-        op_body = game_state["board"]["snakes"][1]["body"]
+    try:
+      my_head = game_state["you"]["head"]
+      my_body = game_state["you"]["body"]
+      op_body = game_state["board"]["snakes"][0]["body"]
+      if op_body == my_body:
+          op_body = game_state["board"]["snakes"][1]["body"]
+    except:
+      return 0
     upper_left = (my_head["x"] - 2, my_head["y"] + 2)
     upper_right = (my_head["x"] + 2, my_head["y"] + 2)
     lower_left = (my_head["x"] - 2, my_head["y"] - 2)
@@ -51,16 +52,23 @@ class OwnHealth(BasicHeuristic):
   """
 
   def normalizedHeuristic(self, game_state):
-    return game_state["you"]["health"] / 100
-
+    try:
+      return game_state["you"]["health"] / 100
+    except:
+      return 0
 
 class DistanceOfHeads(BasicHeuristic):
   """
   Returns one, if heads are in opposite corners and zero if they are directly next to each other.
   """
   def normalizedHeuristic(self, game_state):
-    my_head = game_state["you"]["head"]
-    op_head = game_state["board"]["snakes"][0]["head"]
+    try:
+      my_head = game_state["you"]["head"]
+      op_head = game_state["board"]["snakes"][0]["head"]
+      if my_head == op_head:
+        op_head = game_state["board"]["snakes"][1]["head"]
+    except:
+      return 0
     if op_head == my_head:
         op_head = game_state["board"]["snakes"][1]["head"]
     trueDistance = abs(my_head["x"] - op_head["x"]) + abs(my_head["y"] -
@@ -81,10 +89,13 @@ class SpaceSimple(BasicHeuristic):
     return any(segment["x"] == x and segment["y"] == y for segment in body)
 
   def normalizedHeuristic(self, game_state):
-    x_origin = game_state["you"]["head"]["x"]
-    y_origin = game_state["you"]["head"]["y"]
-    body1 = game_state["snakes"][0]
-    body2 = game_state["snakes"][1]
+    try:
+      x_origin = game_state["you"]["head"]["x"]
+      y_origin = game_state["you"]["head"]["y"]
+      body1 = game_state["snakes"][0]
+      body2 = game_state["snakes"][1]
+    except:
+      return 0
     spaces = 0
     # straight line checks
     # check in x direction
@@ -93,7 +104,7 @@ class SpaceSimple(BasicHeuristic):
           x_origin + i + 1, y_origin, body2):
         break
       spaces += 1
-    for i in range(10 - x_origin):
+    for i in range(x_origin):
       if self.is_in_body(x_origin - i - 1, y_origin, body1) or self.is_in_body(
           x_origin - i - 1, y_origin, body2):
         break
@@ -104,7 +115,7 @@ class SpaceSimple(BasicHeuristic):
           x_origin, y_origin + i + 1, body2):
         break
       spaces += 1
-    for i in range(10 - y_origin):
+    for i in range(y_origin):
       if self.is_in_body(x_origin, y_origin - i - 1, body1) or self.is_in_body(
           x_origin, y_origin - i - 1, body2):
         break
@@ -118,21 +129,21 @@ class SpaceSimple(BasicHeuristic):
         break
       spaces += 1
     # to bottom right
-    for i in range(min(10 - x_origin, 10 - y_origin)):
+    for i in range(min(10 - x_origin, y_origin)):
       if self.is_in_body(x_origin + i + 1,
                          y_origin - i - 1, body1) or self.is_in_body(
                              x_origin + i + 1, y_origin - i - 1, body2):
         break
       spaces += 1
     # to top left
-    for i in range(min(10 - x_origin, 10 - y_origin)):
+    for i in range(min(x_origin, 10 - y_origin)):
       if self.is_in_body(x_origin - i - 1,
                          y_origin + i + 1, body1) or self.is_in_body(
                              x_origin - i - 1, y_origin + i + 1, body2):
         break
       spaces += 1
     # to bottom left
-    for i in range(min(10 - x_origin, 10 - y_origin)):
+    for i in range(min(x_origin, y_origin)):
       if self.is_in_body(x_origin - i - 1,
                          y_origin - i - 1, body1) or self.is_in_body(
                              x_origin - i - 1, y_origin - i - 1, body2):
