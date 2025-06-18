@@ -21,28 +21,28 @@ class AreaAroundHead(BasicHeuristic):
     my_head = game_state["you"]["head"]
     my_body = game_state["you"]["body"]
     if len(game_state["board"]["snakes"]) == 1:
-      return 0
+        return 0
     op_body = game_state["board"]["snakes"][0]["body"]
     if op_body == my_body:
-      op_body = game_state["board"]["snakes"][1]["body"]
+        op_body = game_state["board"]["snakes"][1]["body"]
     upper_left = (my_head["x"] - 2, my_head["y"] + 2)
     upper_right = (my_head["x"] + 2, my_head["y"] + 2)
     lower_left = (my_head["x"] - 2, my_head["y"] - 2)
-    spaces = 0
+    obstacles = 0
     body = False
     for i in range(upper_left[0], upper_right[0] + 1):
-      for j in range(lower_left[1], upper_left[1] + 1):
-        for my_part in my_body:
-          for op_part in op_body:
-            if (my_part["x"] == i
-                and my_part["y"] == j) or (op_part["x"] == i
-                                           and op_part["y"] == j):
-              body = True
+        for j in range(lower_left[1], upper_left[1] + 1):
+            for my_part in my_body:
+                for op_part in op_body:
+                    if (my_part["x"] == i
+                            and my_part["y"] == j) or (op_part["x"] == i
+                                                       and op_part["y"] == j):
+                        body = True
 
-        if body:
-          spaces += 1
-          body = False
-    return spaces / 22
+            if body:
+                obstacles += 1
+                body = False
+    return 1 - (obstacles / 22)
 
 
 class OwnHealth(BasicHeuristic):
