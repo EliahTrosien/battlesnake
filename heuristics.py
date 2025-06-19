@@ -18,31 +18,42 @@ class AreaAroundHead(BasicHeuristic):
   """
 
   def normalizedHeuristic(self, game_state):
-    try:
-      my_head = game_state["you"]["head"]
-      my_body = game_state["you"]["body"]
-      op_body = game_state["board"]["snakes"][0]["body"]
-      if op_body == my_body:
-          op_body = game_state["board"]["snakes"][1]["body"]
-    except:
+    # both snakes dead
+    if len(game_state["board"]["snakes"]) == 0:
       return 0
+    # one snake dead
+    if len(game_state["board"]["snakes"] == 1):
+      try:
+        if game_state["board"]["snakes"][0]["id"] == game_state["you"]["id"]:
+          return 1
+        else:
+          return 0
+      except:
+        return 0
+
+    my_head = game_state["you"]["head"]
+    my_body = game_state["you"]["body"]
+    op_body = game_state["board"]["snakes"][0]["body"]
+    if op_body == my_body:
+      op_body = game_state["board"]["snakes"][1]["body"]
+
     upper_left = (my_head["x"] - 2, my_head["y"] + 2)
     upper_right = (my_head["x"] + 2, my_head["y"] + 2)
     lower_left = (my_head["x"] - 2, my_head["y"] - 2)
     obstacles = 0
     body = False
     for i in range(upper_left[0], upper_right[0] + 1):
-        for j in range(lower_left[1], upper_left[1] + 1):
-            for my_part in my_body:
-                for op_part in op_body:
-                    if (my_part["x"] == i
-                            and my_part["y"] == j) or (op_part["x"] == i
-                                                       and op_part["y"] == j):
-                        body = True
+      for j in range(lower_left[1], upper_left[1] + 1):
+        for my_part in my_body:
+          for op_part in op_body:
+            if (my_part["x"] == i
+                and my_part["y"] == j) or (op_part["x"] == i
+                                           and op_part["y"] == j):
+              body = True
 
-            if body:
-                obstacles += 1
-                body = False
+        if body:
+          obstacles += 1
+          body = False
     return 1 - (obstacles / 22)
 
 
@@ -57,20 +68,34 @@ class OwnHealth(BasicHeuristic):
     except:
       return 0
 
+
 class DistanceOfHeads(BasicHeuristic):
   """
   Returns one, if heads are in opposite corners and zero if they are directly next to each other.
   """
+
   def normalizedHeuristic(self, game_state):
-    try:
-      my_head = game_state["you"]["head"]
-      op_head = game_state["board"]["snakes"][0]["head"]
-      if my_head == op_head:
-        op_head = game_state["board"]["snakes"][1]["head"]
-    except:
+    # both snakes dead
+    if len(game_state["board"]["snakes"]) == 0:
       return 0
+    # one snake dead
+    if len(game_state["board"]["snakes"] == 1):
+      try:
+        if game_state["board"]["snakes"][0]["id"] == game_state["you"]["id"]:
+          return 1
+        else:
+          return 0
+      except:
+        return 0
+
+    my_head = game_state["you"]["head"]
+    my_body = game_state["you"]["body"]
+    op_body = game_state["board"]["snakes"][0]["body"]
+    if op_body == my_body:
+      op_body = game_state["board"]["snakes"][1]["body"]
+
     if op_head == my_head:
-        op_head = game_state["board"]["snakes"][1]["head"]
+      op_head = game_state["board"]["snakes"][1]["head"]
     trueDistance = abs(my_head["x"] - op_head["x"]) + abs(my_head["y"] -
                                                           op_head["y"])
     min_val = 0
@@ -89,13 +114,24 @@ class SpaceSimple(BasicHeuristic):
     return any(segment["x"] == x and segment["y"] == y for segment in body)
 
   def normalizedHeuristic(self, game_state):
-    try:
-      x_origin = game_state["you"]["head"]["x"]
-      y_origin = game_state["you"]["head"]["y"]
-      body1 = game_state["snakes"][0]
-      body2 = game_state["snakes"][1]
-    except:
+    # both snakes dead
+    if len(game_state["board"]["snakes"]) == 0:
       return 0
+    # one snake dead
+    if len(game_state["board"]["snakes"] == 1):
+      try:
+        if game_state["board"]["snakes"][0]["id"] == game_state["you"]["id"]:
+          return 1
+        else:
+          return 0
+      except:
+        return 0
+
+    x_origin = game_state["you"]["head"]["x"]
+    y_origin = game_state["you"]["head"]["y"]
+    body1 = game_state["snakes"][0]
+    body2 = game_state["snakes"][1]
+
     spaces = 0
     # straight line checks
     # check in x direction
