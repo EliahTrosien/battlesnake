@@ -58,6 +58,7 @@ class DistanceOfHeads(BasicHeuristic):
 
   def normalizedHeuristic(self, game_state):
     my_head = game_state.own_body[0]
+    op_head = game_state.opp_body[0]
     my_body = game_state.own_body
     op_body = game_state.opp_body
 
