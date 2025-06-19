@@ -22,7 +22,7 @@ class AreaAroundHead(BasicHeuristic):
     if len(game_state["board"]["snakes"]) == 0:
       return 0
     # one snake dead
-    if len(game_state["board"]["snakes"] == 1):
+    if len(game_state["board"]["snakes"]) == 1:
       try:
         if game_state["board"]["snakes"][0]["id"] == game_state["you"]["id"]:
           return 1
@@ -79,7 +79,7 @@ class DistanceOfHeads(BasicHeuristic):
     if len(game_state["board"]["snakes"]) == 0:
       return 0
     # one snake dead
-    if len(game_state["board"]["snakes"] == 1):
+    if len(game_state["board"]["snakes"]) == 1:
       try:
         if game_state["board"]["snakes"][0]["id"] == game_state["you"]["id"]:
           return 1
@@ -118,7 +118,7 @@ class SpaceSimple(BasicHeuristic):
     if len(game_state["board"]["snakes"]) == 0:
       return 0
     # one snake dead
-    if len(game_state["board"]["snakes"] == 1):
+    if len(game_state["board"]["snakes"]) == 1:
       try:
         if game_state["board"]["snakes"][0]["id"] == game_state["you"]["id"]:
           return 1
