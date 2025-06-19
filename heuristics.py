@@ -18,24 +18,9 @@ class AreaAroundHead(BasicHeuristic):
   """
 
   def normalizedHeuristic(self, game_state):
-    # both snakes dead
-    if len(game_state["board"]["snakes"]) == 0:
-      return 0
-    # one snake dead
-    if len(game_state["board"]["snakes"]) == 1:
-      try:
-        if game_state["board"]["snakes"][0]["id"] == game_state["you"]["id"]:
-          return 1
-        else:
-          return 0
-      except:
-        return 0
-
-    my_head = game_state["you"]["head"]
-    my_body = game_state["you"]["body"]
-    op_body = game_state["board"]["snakes"][0]["body"]
-    if op_body == my_body:
-      op_body = game_state["board"]["snakes"][1]["body"]
+    my_head = game_state.own_body[0]
+    my_body = game_state.own_body
+    op_body = game_state.opp_body
 
     upper_left = (my_head["x"] - 2, my_head["y"] + 2)
     upper_right = (my_head["x"] + 2, my_head["y"] + 2)
@@ -63,10 +48,7 @@ class OwnHealth(BasicHeuristic):
   """
 
   def normalizedHeuristic(self, game_state):
-    try:
-      return game_state["you"]["health"] / 100
-    except:
-      return 0
+    return game_state.own_health / 100
 
 
 class DistanceOfHeads(BasicHeuristic):
@@ -75,24 +57,9 @@ class DistanceOfHeads(BasicHeuristic):
   """
 
   def normalizedHeuristic(self, game_state):
-    # both snakes dead
-    if len(game_state["board"]["snakes"]) == 0:
-      return 0
-    # one snake dead
-    if len(game_state["board"]["snakes"]) == 1:
-      try:
-        if game_state["board"]["snakes"][0]["id"] == game_state["you"]["id"]:
-          return 1
-        else:
-          return 0
-      except:
-        return 0
-
-    my_head = game_state["you"]["head"]
-    my_body = game_state["you"]["body"]
-    op_body = game_state["board"]["snakes"][0]["body"]
-    if op_body == my_body:
-      op_body = game_state["board"]["snakes"][1]["body"]
+    my_head = game_state.own_body[0]
+    my_body = game_state.own_body
+    op_body = game_state.opp_body
 
     if op_head == my_head:
       op_head = game_state["board"]["snakes"][1]["head"]
@@ -114,23 +81,10 @@ class SpaceSimple(BasicHeuristic):
     return any(segment["x"] == x and segment["y"] == y for segment in body)
 
   def normalizedHeuristic(self, game_state):
-    # both snakes dead
-    if len(game_state["board"]["snakes"]) == 0:
-      return 0
-    # one snake dead
-    if len(game_state["board"]["snakes"]) == 1:
-      try:
-        if game_state["board"]["snakes"][0]["id"] == game_state["you"]["id"]:
-          return 1
-        else:
-          return 0
-      except:
-        return 0
-
-    x_origin = game_state["you"]["head"]["x"]
-    y_origin = game_state["you"]["head"]["y"]
-    body1 = game_state["snakes"][0]
-    body2 = game_state["snakes"][1]
+    x_origin = game_state.own_body[0]["x"]
+    y_origin = game_state.own_body[0]["y"]
+    body1 = game_state.own_body
+    body2 = game_state.opp_body
 
     spaces = 0
     # straight line checks
