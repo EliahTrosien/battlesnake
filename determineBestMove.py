@@ -169,9 +169,8 @@ def doMove(game_state, move, is_own_move):
 
     return new_game_state
 
-
-def getSafeMoves(game_state, is_own_move):
-    is_move_safe = {"up": True, "down": True, "left": True, "right": True}
+def getLegalMoves(game_state, is_own_move):
+    is_move_legal = {"up": True, "down": True, "left": True, "right": True}
 
     if is_own_move:
         snake = game_state.own_body
@@ -185,40 +184,40 @@ def getSafeMoves(game_state, is_own_move):
     my_neck = snake[1]
 
     if my_neck["x"] < my_head["x"]:
-        is_move_safe["left"] = False
+        is_move_legal["left"] = False
 
     elif my_neck["x"] > my_head["x"]:
-        is_move_safe["right"] = False
+        is_move_legal["right"] = False
 
     elif my_neck["y"] < my_head["y"]:
-        is_move_safe["down"] = False
+        is_move_legal["down"] = False
 
     elif my_neck["y"] > my_head["y"]:
-        is_move_safe["up"] = False
+        is_move_legal["up"] = False
 
     # Prevention from moving out of bounds
     board_width = 11
     board_height = 11
     if my_head["x"] == 0:
-        is_move_safe["left"] = False
+        is_move_legal["left"] = False
     if my_head["x"] == board_width - 1:
-        is_move_safe["right"] = False
+        is_move_legal["right"] = False
     if my_head["y"] == 0:
-        is_move_safe["down"] = False
+        is_move_legal["down"] = False
     if my_head["y"] == board_height - 1:
-        is_move_safe["up"] = False
+        is_move_legal["up"] = False
 
     # Prevention from colliding with itself
     my_body = snake
     for bodypart in my_body:
         if my_head["x"] + 1 == bodypart["x"] and my_head["y"] == bodypart["y"]:
-            is_move_safe["right"] = False
+            is_move_legal["right"] = False
         if my_head["x"] - 1 == bodypart["x"] and my_head["y"] == bodypart["y"]:
-            is_move_safe["left"] = False
+            is_move_legal["left"] = False
         if my_head["y"] + 1 == bodypart["y"] and my_head["x"] == bodypart["x"]:
-            is_move_safe["up"] = False
+            is_move_legal["up"] = False
         if my_head["y"] - 1 == bodypart["y"] and my_head["x"] == bodypart["x"]:
-            is_move_safe["down"] = False
+            is_move_legal["down"] = False
 
     # Prevention from colliding with other Battlesnakes
     if game_state.opp_body != my_body:
@@ -227,17 +226,92 @@ def getSafeMoves(game_state, is_own_move):
         opponent_body = game_state.own_body
     for bodypart in opponent_body:
         if my_head["x"] + 1 == bodypart["x"] and my_head["y"] == bodypart["y"]:
-            is_move_safe["right"] = False
+            is_move_legal["right"] = False
         if my_head["x"] - 1 == bodypart["x"] and my_head["y"] == bodypart["y"]:
-            is_move_safe["left"] = False
+            is_move_legal["left"] = False
         if my_head["y"] + 1 == bodypart["y"] and my_head["x"] == bodypart["x"]:
-            is_move_safe["up"] = False
+            is_move_legal["up"] = False
         if my_head["y"] - 1 == bodypart["y"] and my_head["x"] == bodypart["x"]:
-            is_move_safe["down"] = False
+            is_move_legal["down"] = False
 
+    # Return legal moves
+    legal_moves = []
+    for move, isLegal in is_move_legal.items():
+        if isLegal:
+            legal_moves.append(move)
+    return legal_moves
+
+
+def getSafeMoves(game_state, is_own_move):
+    legal_moves = getLegalMoves(game_state, is_own_move)
+    directions = ["up", "down", "left", "right"]
+    legal_moves_dict = {d: (d in legal_moves) for d in directions}
+    is_move_safe = legal_moves_dict
+    my_head = game_state.own_body[0]
+    my_body = game_state.own_body
+    opp_body = game_state.opp_body
+    opp_head = game_state.opp_body[0]
+
+    opp_larger = False
+    if opp_body >= my_body:
+        opp_larger = True
+
+    # diagonal collision possible
+    if abs(my_head["x"] - opp_head["x"]) < 2 and abs(my_head["y"] -
+                                                     opp_head["y"]) < 2:
+        # opponent is very close to us
+        if opp_larger:
+            votes = {"right": 0, "left": 0, "up": 0, "down": 0}
+            if opp_head["x"] == my_head["x"] + 1:
+                votes["right"] = votes["right"] + 1
+            if opp_head["x"] == my_head["x"] - 1:
+                votes["left"] = votes["left"] + 1
+            if opp_head["y"] == my_head["y"] + 1:
+                votes["up"] = votes["up"] + 1
+            if opp_head["y"] == my_head["y"] - 1:
+                votes["down"] = votes["down"] + 1
+            max_vote = max(votes.values())
+            opp_direction = [
+                direction for direction, vote in votes.items() if vote == max_vote
+            ]
+            for dir in opp_direction:
+                if dir == "right":
+                    if is_move_safe["right"]:
+                        is_move_safe["right"] = False
+                elif dir == "left":
+                    if is_move_safe["left"]:
+                        is_move_safe["left"] = False
+                elif dir == "up":
+                    if is_move_safe["up"]:
+                        is_move_safe["up"] = False
+                else:
+                    if is_move_safe["down"]:
+                        is_move_safe["down"] = False
+    is_move_safe = checkCollision(game_state, is_move_safe, opp_larger)
     # Return safe moves
     safe_moves = []
     for move, isSafe in is_move_safe.items():
         if isSafe:
             safe_moves.append(move)
     return safe_moves
+
+def checkCollision(game_state, is_move_safe, opp_larger):
+    # checks if head to head collision is imminent and returns the direction to dodge
+    my_head = game_state.my_body[0]
+    opp_body = game_state.opp_body
+    opp_head = game_state.opp_body[0]
+    if my_head["x"] == opp_head["x"]:
+        if my_head["y"] == opp_head["y"] + 2:
+            if opp_larger:
+                is_move_safe["down"] = False
+        if my_head["y"] == opp_head["y"] - 2:
+            if opp_larger:
+                is_move_safe["up"] = False
+    if my_head["y"] == opp_head["y"]:
+        if my_head["x"] == opp_body["head"]["x"] + 2:
+            if opp_larger:
+                is_move_safe["left"] = False
+        if my_head["x"] == opp_head["x"] - 2:
+            if opp_larger:
+                is_move_safe["right"] = False
+    return is_move_safe
