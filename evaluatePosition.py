@@ -5,8 +5,10 @@ def getEvaluation(game_state):
     healthHeuristic = heuristics.OwnHealth()
     spaceHeuristic = heuristics.SpaceSimple()
     distanceHeuristic = heuristics.DistanceOfHeads()
-    headAreaHeuristic = heuristics.AreaAroundHead()
+    middleHeuristic = heuristics.ToMiddle()
+    movesHeuristic = heuristics.NumberOfMoves()
     return (0.2 * healthHeuristic.normalizedHeuristic(game_state) +
-            0.3 * spaceHeuristic.normalizedHeuristic(game_state) +
-            0.3 * distanceHeuristic.normalizedHeuristic(game_state) + 
+            0.2 * spaceHeuristic.normalizedHeuristic(game_state) +
+            0.2 * distanceHeuristic.normalizedHeuristic(game_state) + 
+            0.2 * headAreaHeuristic.normalizedHeuristic(game_state) +
             0.2 * headAreaHeuristic.normalizedHeuristic(game_state))
