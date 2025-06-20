@@ -50,6 +50,7 @@ def calcBestMove(gs):
         else:
             own_move = False
 
+        possible_moves = []
         safe_moves = getSafeMoves(current_node.gamestate, own_move)
         if not safe_moves:
             legal_moves = getLegalMoves(current_node.gamestate, own_move)
