@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+import determineBestMove
+
+from detBestMoveHannes import getLegalMoves
 """
 This file is where the heuristics are defined. All of them are returned normalized with values between zero and one with one being the best possible value.
 """
@@ -45,10 +48,19 @@ class AreaAroundHead(BasicHeuristic):
 class OwnHealth(BasicHeuristic):
   """
   Returns one if we have full health and zero if we have none.
+  If the opponent is larger than we are, we subtract the difference in length from our health 
+  to make the snake more hungry.
   """
 
   def normalizedHeuristic(self, game_state):
-    return game_state.own_health / 100
+    health = game_state.own_health
+    health -= 50
+    len_diff = len(game_state.opp_body) - len(game_state.own_body)
+    if len_diff > 0:
+      health -= len_diff * 4
+    if health < 0:
+      health = 0
+    return health / 50
 
 
 class DistanceOfHeads(BasicHeuristic):
@@ -62,13 +74,19 @@ class DistanceOfHeads(BasicHeuristic):
     my_body = game_state.own_body
     op_body = game_state.opp_body
 
-    if op_head == my_head:
-      op_head = game_state["board"]["snakes"][1]["head"]
+    opp_larger = False
+    if len(op_body) >= len(my_body):
+      opp_larger = True
+      
     trueDistance = abs(my_head["x"] - op_head["x"]) + abs(my_head["y"] -
-                                                          op_head["y"])
+                                                            op_head["y"])
+    
     min_val = 0
     max_val = 20
-    return (trueDistance - min_val) / (max_val - min_val)
+    if opp_larger:
+      return (trueDistance - min_val) / (max_val - min_val)
+    else:
+      return 1 - (trueDistance - min_val) / (max_val - min_val)
 
 
 class SpaceSimple(BasicHeuristic):
@@ -141,3 +159,26 @@ class SpaceSimple(BasicHeuristic):
         break
       spaces += 1
     return spaces / 40
+
+class ToMiddle(BasicHeuristic):
+  """
+  Bias to the middle of the board
+  """
+  def normalizedHeuristic(self, game_state):
+    my_head = game_state.own_body[0]
+    middle_x = 5
+    middle_y = 5
+    distance_to_middle = abs(my_head["x"] - middle_x) + abs(my_head["y"] - middle_y)
+    return 1 - (distance_to_middle / 10)
+
+class NumberOfMoves(BasicHeuristic):
+  """
+  Returns 1 if three moves are possible and 0 if only one is possible
+  """
+  def normalizedHeuristic(self, game_state):
+    possible_moves = determineBestMove.getSafeMoves(game_state, True)
+    if not possible_moves:
+      possible_moves = determineBestMove.getLegalMoves(game_state, True)
+      if not possible_moves:
+        return 0
+    return len(possible_moves) / 3
