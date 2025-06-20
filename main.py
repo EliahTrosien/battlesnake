@@ -5,16 +5,6 @@ from typing import List, Tuple
 
 
 class gameState:
-    own_body: List[Tuple[
-        int, int]]  # saves the body of own snake, with head being own_body[0]
-    own_health: int  # saves the own current health: 0 < own_health <= 100
-    opp_body: List[Tuple[
-        int,
-        int]]  # saves the body of opponents snake, with head being opp_body[0]
-    opp_health: int  # saves the opponents current health: 0 < opp_health <= 100
-    food: List[Tuple[
-        int,
-        int]]  # saves all the places where food is (might be sorted in some way, don't know, does not matter)
 
     def __init__(self, server_response):
         self.own_body = server_response['board']['snakes'][0]['body']
@@ -51,7 +41,11 @@ def end(game_state: typing.Dict):
 def move(game_state: typing.Dict) -> typing.Dict:
 
     best_move = None
-
+    if game_state["board"]["snakes"][0] != game_state["you"]:
+        temp_snake = game_state["board"]["snakes"][0]
+        game_state["board"]["snakes"][0] = game_state["board"]["snakes"][1]
+        game_state["board"]["snakes"][1] = temp_snake
+        
     # convert server response to gamestate with less information
     state = gameState(game_state)
 
