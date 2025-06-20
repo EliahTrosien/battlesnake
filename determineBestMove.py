@@ -50,10 +50,16 @@ def calcBestMove(gs):
         else:
             own_move = False
 
-        possible_moves = getSafeMoves(current_node.gamestate, own_move)
-        #???
-        if not possible_moves:
-            current_node.utility = 0
+        safe_moves = getSafeMoves(current_node.gamestate, own_move)
+        if not safe_moves:
+            legal_moves = getLegalMoves(current_node.gamestate, own_move)
+            if not legal_moves:
+                current_node.utility = 0
+            else:
+                possible_moves = legal_moves
+        else:
+            possible_moves = safe_moves
+        
 
         for move in possible_moves:
             if time.time() - start_time > time_limit:
@@ -247,6 +253,13 @@ def getSafeMoves(game_state, is_own_move):
     directions = ["up", "down", "left", "right"]
     legal_moves_dict = {d: (d in legal_moves) for d in directions}
     is_move_safe = legal_moves_dict
+    
+    if is_own_move:
+        snake = game_state.own_body
+        opponent_body = game_state.opp_body
+    else:
+        snake = game_state.opp_body
+        opponent_body = game_state.own_body
     my_head = game_state.own_body[0]
     my_body = game_state.own_body
     opp_body = game_state.opp_body
@@ -287,7 +300,7 @@ def getSafeMoves(game_state, is_own_move):
                 else:
                     if is_move_safe["down"]:
                         is_move_safe["down"] = False
-    is_move_safe = checkCollision(game_state, is_move_safe, opp_larger)
+    is_move_safe = checkCollision(game_state, is_own_move, is_move_safe, opp_larger)
     # Return safe moves
     safe_moves = []
     for move, isSafe in is_move_safe.items():
@@ -295,8 +308,14 @@ def getSafeMoves(game_state, is_own_move):
             safe_moves.append(move)
     return safe_moves
 
-def checkCollision(game_state, is_move_safe, opp_larger):
+def checkCollision(game_state, is_own_move, is_move_safe, opp_larger):
     # checks if head to head collision is imminent and returns the direction to dodge
+    if is_own_move:
+        snake = game_state.own_body
+        opponent_body = game_state.opp_body
+    else:
+        snake = game_state.opp_body
+        opponent_body = game_state.own_body
     my_head = game_state.my_body[0]
     opp_body = game_state.opp_body
     opp_head = game_state.opp_body[0]
